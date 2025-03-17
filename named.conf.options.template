@@ -1,0 +1,34 @@
+options {
+    directory "/var/cache/bind";
+
+    // If there is a firewall between you and nameservers you want
+    // to talk to, you may need to fix the firewall to allow multiple
+    // ports to talk. See http://www.kb.cert.org/vuls/id/800113 .
+
+    // If your ISP provided one or more IP addresses for stable
+    // nameservers, you probably want to use them as forwarders.
+    // Uncomment the following block, and insert the addresses replacing
+    // the all-0's placeholder.
+
+    // forwarders { 0.0.0.0; };
+    // __FORWARDERS__
+
+    // Enable recursive queries for localhost and local networks.
+    allow-recursion { 127.0.0.1; 10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16; };
+    
+    // Allow dynamic updates.
+    allow-update-forwarding { any; };
+    
+    // If DNSSEC validation is enabled, set it to no.
+    dnssec-validation no;
+
+    // Allow all queries.
+    allow-query { any; };
+
+    // Enable IPv4 operation.
+    // listen-on { any; };
+    // __LISTEN_ON__
+    
+    // Enable IPv6 operation.
+    // listen-on-v6 { any; };
+};

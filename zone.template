@@ -1,0 +1,15 @@
+$TTL 86400
+@       IN      SOA     ns.__ZONE_NAME__. admin.__ZONE_NAME__. (
+                        __SERIAL__      ; Serial
+                        3600            ; Refresh
+                        1800            ; Retry
+                        604800          ; Expire
+                        86400           ; Minimum TTL
+)
+
+; Name servers.
+@       IN      NS      ns.__ZONE_NAME__.
+
+; A records for name servers.
+ns      IN      A       127.0.0.1
+admin   IN      A       127.0.0.1
