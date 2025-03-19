@@ -1,0 +1,7 @@
+#cloud-config
+runcmd:
+  - ZONE_NAME=####ZONE_NAME####
+  - ZONE_TSIG_KEY=####ZONE_TSIG_KEY####
+  - ZONE_TSIG_SECRET=####ZONE_TSIG_SECRET####
+  - LISTEN_ON=####LISTEN_ON####
+  - UPSTREAM_RESOLVERS=####UPSTREAM_RESOLVERS####
