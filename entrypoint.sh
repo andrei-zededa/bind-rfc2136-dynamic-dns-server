@@ -55,7 +55,7 @@ else
 	echo "Creating a new zone file for '${ZONE_NAME}' ......";
 	# Create a serial number based on the date (YYYYMMDDnn format).
 	serial="$(date +%Y%m%d01)";
-    
+
 	mkdir -p "/etc/bind/zones";
 	sed -E "s/__ZONE_NAME__/${ZONE_NAME}/g" "/etc/bind/zone.template"	\
 		| sed "s/__SERIAL__/${serial}/g" > "/etc/bind/zones/db.${ZONE_NAME}";
@@ -120,6 +120,38 @@ named-checkconf "/etc/bind/named.conf";
 
 # Check the zone file
 named-checkzone "${ZONE_NAME}" "/etc/bind/zones/db.${ZONE_NAME}";
+
+# Evaluate any additional environment variables passed as a JSON file.
+more_env_vars_file="/custom_config_env_vars.json";
+[ -f "$more_env_vars_file" ] && {
+        # Process the JSON file with safety measures for special characters.
+	more_env_vars="$(jq -er -f <(cat <<-'JQPROGRAM'
+		to_entries | .[] |
+		# Check if key is a valid shell variable name (letters, numbers, underscore, not starting with a number)
+		if (.key | test("^[a-zA-Z_][a-zA-Z0-9_]*$")) then
+			# Handle different value types
+			if (.value | type) == "string" then
+				# Escape single quotes in string values
+				"export \(.key)='\(.value | @sh)'"
+			elif (.value | type) == "number" or (.value | type) == "boolean" then
+				"export \(.key)=\(.value)"
+			else
+				# For arrays, objects and other complex types
+				"export \(.key)='\(.value | tostring | @sh)'"
+			end
+		else
+			# Skip invalid variable names and print warning
+			"# WARNING: Skipping invalid variable name: \(.key)"
+		end
+		JQPROGRAM
+		) "$more_env_vars_file" || true)";
+	[ -n "$more_env_vars" ] && {
+		echo "= Loading more environment variables from ${more_env_vars_file}: =";
+		echo "$more_env_vars";
+		source <(echo "$more_env_vars");
+		echo "========================================================================";
+	}
+}
 
 # Pass control to the CMD in the Dockerfile
 exec "$@";

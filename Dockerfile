@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 # Install the BIND DNS server and related tools.
 RUN apt-get update && \
-    apt-get install -y bind9 bind9-utils dnsutils && \
+    apt-get install -y bind9 bind9-utils dnsutils jq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

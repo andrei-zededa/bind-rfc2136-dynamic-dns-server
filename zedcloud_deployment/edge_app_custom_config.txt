@@ -5,3 +5,11 @@ runcmd:
   - ZONE_TSIG_SECRET=####ZONE_TSIG_SECRET####
   - LISTEN_ON=####LISTEN_ON####
   - UPSTREAM_RESOLVERS=####UPSTREAM_RESOLVERS####
+write_files:
+  - path: /custom_config_env_vars.json
+    content: |
+      {
+	      "TEST_KEY_1": "TEST_VALUE_1",
+	      "TEST_KEY_2": 2000,
+	      "TEST_KEY_3": false
+      }
