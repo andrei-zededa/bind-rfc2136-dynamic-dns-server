@@ -7,9 +7,11 @@ runcmd:
   - UPSTREAM_RESOLVERS=####UPSTREAM_RESOLVERS####
 write_files:
   - path: /custom_config_env_vars.json
+    permissions: "0644"
+    encoding: "plain"
     content: |
       {
-	      "TEST_KEY_1": "TEST_VALUE_1",
-	      "TEST_KEY_2": 2000,
-	      "TEST_KEY_3": false
+        "TEST_KEY_1": "TEST_VALUE_1",
+        "TEST_KEY_2": 2000,
+        "TEST_KEY_3": false
       }

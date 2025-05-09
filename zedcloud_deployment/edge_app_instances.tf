@@ -1,54 +1,8 @@
-resource "zedcloud_network_instance" "NI_INTERNET" {
-  name      = "ni_internet_on_${data.zedcloud_edgenode.EDGE_NODE.name}"
-  title     = "TF created instance of ni_internet for ${data.zedcloud_edgenode.EDGE_NODE.name}"
-  kind      = "NETWORK_INSTANCE_KIND_LOCAL"
-  type      = "NETWORK_INSTANCE_DHCP_TYPE_V4"
+data "zedcloud_network_instance" "NI_INTERNET" {
+  name      = "PG-INTERNET-SESTHIT1-EVE121"
+  title     = "PG-INTERNET-SESTHIT1-EVE121"
+  kind      = "NETWORK_INSTANCE_KIND_SWITCH"
   device_id = data.zedcloud_edgenode.EDGE_NODE.id
-
-  # `uplink` is the most common configuration or a value that must match the
-  # edge-node interface name which is set the same as the "logical label" in
-  # the model, could be `eth0` for example.
-  port = "uplink"
-
-  # The edge-application-instance (a specific interface of that instance) will
-  # be connected to this network-instance by matching on a tag.
-  tags = {
-    ni_internet = "true"
-  }
-}
-
-resource "zedcloud_network_instance" "NI_INTERNAL" {
-  name  = "ni_internal_on_${data.zedcloud_edgenode.EDGE_NODE.name}"
-  title = "TF created instance of ni_internal for ${data.zedcloud_edgenode.EDGE_NODE.name}"
-  kind  = "NETWORK_INSTANCE_KIND_LOCAL"
-  type  = "NETWORK_INSTANCE_DHCP_TYPE_V4"
-  # kind  = "NETWORK_INSTANCE_KIND_SWITCH"
-  # type  = "NETWORK_INSTANCE_DHCP_TYPE_UNSPECIFIED"
-  device_id = data.zedcloud_edgenode.EDGE_NODE.id
-
-  # Must match the edge-node interface name which is connected to the "INTERNAL
-  # NETWORK" where we want the edge-app-instance to be available. The edge-node
-  # interface name is the same as the "logical label" in the model, could be
-  # `eth2` for example.
-  port = "eth1"
-
-  ip {
-    subnet  = "192.168.13.0/24"
-    gateway = "192.168.13.1"
-
-    dns = var.DNS_SERVER_IP_ADDR != "" ? [var.DNS_SERVER_IP_ADDR] : ["192.168.13.1"]
-
-    dhcp_range {
-      start = "192.168.13.128"
-      end   = "192.168.13.254"
-    }
-  }
-
-  # The edge-application-instance (a specific interface of that instance) will
-  # be connected to this network-instance by matching on a tag.
-  tags = {
-    ni_internal = "true"
-  }
 }
 
 resource "zedcloud_application_instance" "APP_INSTANCE" {
@@ -57,8 +11,7 @@ resource "zedcloud_application_instance" "APP_INSTANCE" {
   # Terraform cannot "see" this dependencies and would result in an error on
   # destroy because of ordering of operations.
   depends_on = [
-    zedcloud_network_instance.NI_INTERNET,
-    zedcloud_network_instance.NI_INTERNAL
+    data.zedcloud_network_instance.NI_INTERNET
   ]
 
   name      = "${data.zedcloud_project.PROJECT.name}__${data.zedcloud_edgenode.EDGE_NODE.name}__${zedcloud_application.app_definition.name}"
@@ -129,20 +82,6 @@ resource "zedcloud_application_instance" "APP_INSTANCE" {
     intfname    = zedcloud_application.app_definition.manifest[0].interfaces[0].name
     intforder   = 1
     privateip   = false
-    netinstname = ""
-    netinsttag = {
-      ni_internet = "true"
-    }
-  }
-
-  interfaces {
-    intfname    = zedcloud_application.app_definition.manifest[0].interfaces[1].name
-    intforder   = 2
-    privateip   = false
-    ipaddr      = var.DNS_SERVER_IP_ADDR != "" ? var.DNS_SERVER_IP_ADDR : ""
-    netinstname = ""
-    netinsttag = {
-      ni_internal = "true"
-    }
+    netinstname = data.zedcloud_network_instance.NI_INTERNET.name
   }
 }

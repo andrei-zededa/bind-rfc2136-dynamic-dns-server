@@ -99,84 +99,12 @@ resource "zedcloud_application" "app_definition" {
 
     interfaces {
       directattach = false
-      name         = "internet"
+      name         = "app_eth0"
       optional     = false
       privateip    = false
 
       acls {
         matches {
-          type  = "ip"
-          value = "0.0.0.0/0"
-        }
-      }
-    }
-
-    interfaces {
-      directattach = false
-      name         = "internal"
-      optional     = true
-      privateip    = false
-
-      acls {
-        matches {
-          type  = "ip"
-          value = "0.0.0.0/0"
-        }
-      }
-
-      acls {
-        actions {
-          drop       = false
-          limit      = false
-          limitburst = 0
-          limitrate  = 0
-          portmap    = true
-          #
-          portmapto {
-            # This is the application instance port.
-            app_port = 53
-          }
-        }
-        matches {
-          type  = "protocol"
-          value = "udp"
-        }
-        matches {
-          # This is the edge-node port.
-          type  = "lport"
-          value = "53"
-        }
-        matches {
-          # Source address of the traffic.
-          type  = "ip"
-          value = "0.0.0.0/0"
-        }
-      }
-      #
-      acls {
-        actions {
-          drop       = false
-          limit      = false
-          limitburst = 0
-          limitrate  = 0
-          portmap    = true
-          #
-          portmapto {
-            # This is the application instance port.
-            app_port = 53
-          }
-        }
-        matches {
-          type  = "protocol"
-          value = "tcp"
-        }
-        matches {
-          # This is the edge-node port.
-          type  = "lport"
-          value = "53"
-        }
-        matches {
-          # Source address of the traffic.
           type  = "ip"
           value = "0.0.0.0/0"
         }
