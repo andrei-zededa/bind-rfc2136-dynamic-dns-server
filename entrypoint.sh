@@ -17,20 +17,22 @@ tsig_conf_file="/etc/bind/dyn-update/dyn-update.key";
 # in a mounted volume.
 [ -z "$ZONE_TSIG_SECRET" ] && {
 	if [ -f "$tsig_conf_file" ]; then
-		echo "Re-using previously generated TSIG secret.";
+		echo "Re-using previously generated TSIG secret from file: $tsig_conf_file .";
 	else
-		echo "Generating a new TSIG secret ......";
-		ZONE_TSIG_SECRET="$(head -c 16 /dev/urandom | base64)";
+		echo "Generating a new random string to be used as the TSIG secret ......";
+		ZONE_TSIG_SECRET="$(head -c 16 /dev/urandom | base32 | sed -E 's/=*$//g')";
 		echo "Generated TSIG secret: $ZONE_TSIG_SECRET";
 	fi
 }
 
-# Create (or update) the key config file.
+# Create (or update) the key config file. The `secret` value MUST be base64
+# encoded in the config file: https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-secret .
 mkdir -p "$(dirname "$tsig_conf_file")";
+zone_tsig_secret_encoded="$(echo "${ZONE_TSIG_SECRET}" | base64)";
 cat > "$tsig_conf_file" <<-EOF
 key "${ZONE_TSIG_KEY}" {
 	algorithm hmac-sha256;
-	secret "${ZONE_TSIG_SECRET}";
+	secret "${zone_tsig_secret_encoded}";
 };
 EOF
 
